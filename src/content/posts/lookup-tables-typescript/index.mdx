@@ -1,0 +1,130 @@
+---
+title: Lookup Tables in Typescript
+subtitle: and how to use them
+date: "2021-05-03T00:00:00.000Z"
+tags: [typescript, branching]
+---
+
+Often the messiest part of someone's code tends to be the part where the code branching occurs.
+Code branching is essentially the part of the that depends on a certain condition, think of tools
+such as `if...else if` statements or `switch` cases. The problem with these tools is that the
+more branching cases we introduce the harder to read our code becomes.
+
+```ts
+function colorFruitMapper(color) {
+  if (color === "yellow") {
+    return "banana"
+  } else if (color === "red") {
+    return "tomato" // yes, tomato is a fruit
+  } else if (color === "orange") {
+    return "orange"
+  } else if (color === "purple") {
+    return "grape"
+  }
+  return "unknown fruit"
+}
+```
+
+Even in this simple example the code has gotten much too verbose for the task it's trying to accomplish.
+There is a way how to write the same code in a much more scalable way by using a plain js object as a lookup table.
+
+```ts
+const colorFruitMap = {
+  yellow: "banana",
+  red: "tomato",
+  orange: "orange",
+  purple: "grape",
+}
+
+function colorFruitMapper(color) {
+  return colorFruitMap[color] || "unknown fruit"
+}
+```
+
+There you go. There are a few advantages to this approach. A lookup table gives us an uncluttered overview of which color corresponds to which fruit.
+Should we need to add more colors in the future, it will not be necessary to extend the logic of `colorFruitMapper`.
+The more logic, we write, the higher the chance for a bug to slip in unnoticed. Additionally,
+this approach si more DRY, becayse the lookup table `colorFruitMap` can be reused.
+
+## Safer Lookup Tables using Typescript
+
+We can make our lookup table even more resilient by using the built in utilty type `Record<Keys,Type>`. Since
+it's a generic type we need to provide it with type arguments e.g `Record<string, number>`
+
+```ts
+const numberNameMap: Record<string, number> = {
+  one: 1,
+  two: 2,
+  three: 3,
+}
+```
+
+The first argument - `string` specifies that the keys should be of type `string` and the second specifies the type
+of the values - in our case these can only be `number`.
+So should someone insert a value of a different type,
+we'll get an error which is exactly what we want.
+
+```ts
+const numberNameMap: Record<string, number> = {
+  zero: null, // error: Type 'null' is not assignable to type 'number'
+  one: 1,
+}
+```
+
+## Further type safety with Union String Types
+
+In the previous example, we achieved type safety only for the values, but not for the keys.
+The keys of the lookup tables could be any string. When we don't know our
+keys ahead of time using the `string` type is alright.
+What if we want to make sure that our lookup table has specific keys and doesn't
+accept any random strings. We can achieve this by using a Union String Type.
+If you are unsure what Union String Types are, you can read my article on them [here](../union-string-type).
+
+```ts
+type Color = "yellow" | "red" | "orange" | "purple"
+
+const colorFruitMap: Record<Color, string> = {
+  yellow: "banana",
+  red: "tomato",
+  orange: "orange",
+  purple: "grape",
+}
+
+function colorFruitMapper(color: Color) {
+  return colorFruitMap[color]
+}
+```
+
+In this way our lookup table becomes exhaustive - we are forced to include all possible values of `Color`.
+
+```ts
+type Color = "yellow" | "red" | "orange" | "purple"
+
+const colorFruitMap: Record<Color, string> = {
+  yellow: "banana",
+}
+// the above code has the followin error
+
+//Type '{ yellow: string; }' is missing the following properties
+// from type 'Record<Color, string>': red, purple, orange
+```
+
+Since Typescript knows which keys we should have, it can protect us from silly mistakes.
+
+```ts
+type Color = "yellow" | "red"
+
+const colorFruitMap: Record<Color, string> = {
+  red: "tomato"
+  yelow: "banana" // error: Type '{ yelow: string; red: string; }'
+                  // is not assignable to type 'Record<Color, string>'
+}
+```
+
+If we add further colors to the `Color` type, Typescript will throw an error and
+tell us that we have an unhandled color and 'force' us to add it to `colorFruitMap`.
+
+## Summary
+
+We went from a type unsafe cluttered mess of `if...else if` statements with a lot of repetition statements to a more
+structured and reusable approach, where the compiler helps us ensure that our code branching is handled correctly.

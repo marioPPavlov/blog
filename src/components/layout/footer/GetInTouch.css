@@ -1,0 +1,78 @@
+.get-in-touch {
+  background: rgb(27, 76, 208);
+  background: linear-gradient(
+    45deg,
+    var(--color-primary) 12%,
+    var(--color-primary-highlight) 100%
+  );
+  padding: var(--spacing-5) var(--spacing-5) var(--spacing-10) var(--spacing-5);
+  border-radius: 0.3rem;
+  color: white;
+  margin-bottom: var(--spacing-5);
+  box-shadow: rgba(128, 121, 121, 0.56) 0px 2px 6px 2px;
+}
+
+.get-in-touch__caption {
+  text-align: center;
+  margin-top: 0;
+}
+
+.get-in-touch__content {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.get-in-touch__left-col {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 60%;
+  justify-content: center;
+  padding: 0 1rem 0 1rem;
+  margin-bottom: 1rem;
+}
+
+.get-in-touch__right-col {
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  flex: 1 0 40%;
+  justify-content: space-around;
+}
+
+.get-in-touch__right-col > label:not(:first-child) {
+  margin-top: var(--spacing-1);
+}
+
+.get-in-touch__input {
+  border: 1px solid #dddfe2;
+  /* outline-color: var(--color-primary); */
+
+  border-radius: 0.2rem;
+  color: var(--color-text-light);
+  font-size: var(--fontSize-1);
+  height: 30px;
+  line-height: 16px;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.get-in-touch__input:focus,
+.get-in-touch__input:focus {
+  outline: none;
+}
+
+.get-in-touch__message {
+  height: 7rem;
+  resize: none;
+}
+
+.get-in-touch__button {
+  width: 5rem;
+  margin-top: 1rem;
+  margin: 0.5rem auto 0 auto;
+}
+
+.get-in-touch__error {
+  color: red;
+  margin: 1rem 0;
+}

@@ -1,0 +1,85 @@
+---
+title: Union String Types in Typescript
+subtitle: and why your functions should use them
+date: "2021-04-11T22:12:03.284Z"
+tags: [typescript]
+---
+
+The great thing about a string is, that it can be pretty much anything.
+It can hold a name, a sentence, even javascript objects can be represented in a string format - you get the point,
+strings have a huge range. That is great and all, however there comes a time when this inclusivity of the
+string type is not desired. Wouldn't it be great if you can tell the compiler, that a certain string can
+have only 2 or 3 possible values and enforce them during compile time? This is exactly where union string types come in.
+
+## A simple union string type
+
+Let's create a simple `Answer` type and set two possible states for it - `yes` and `no`.
+
+```ts
+type Answer = "yes" | "no"
+
+const answer1: Answer = "yes"
+const answer2: Answer = "no"
+```
+
+Alright, cool. By separating `yes` and `no` with a `|` we've created a union string type. Basically,
+a variable of type `Answer` is a string, but is limited to what values it can hold.
+To test this, we can try to intentionally put an invalid value:
+
+```ts
+const answer3: Answer = "maybe" //compile error
+// there is no maybe for a yes or no question ;)
+```
+
+Great! We are getting an error when we try to assign an invalid value.
+This is exactly the behaviour we want and what we should aim in our code.
+The type `Answer` can't be just any string under the sun, it can be only "yes" or "no". This means
+that from now on Typescript will guard us from making mistakes.
+
+## Union string types shine best as function parameters
+
+When I read code, I like to see the clear intention of the author i.e. why is this code there and what is it trying to achieve.
+One of the ways you can achieve this is by using nice formatting, meaningful function names and union string types instead of
+plain strings wherever possible. To show what I mean, lets implement a function, that accepts a string parameter:
+
+```ts
+function printTrafficLight(light: string) {
+  if (light === "Red") {
+    console.log("Stop")
+  } else if (light === "Yellow") {
+    console.log("Get ready...")
+  } else if (light === "Green") {
+    console.log("Go go go")
+  }
+}
+```
+
+The thing I don't like about the above example is how my eyes have to go down through the entire body of the
+function in order to find out what all the possible states of `light` are. On top of that, I have to make a mental
+note that `Red`, `Yellow` and `Green` all start with a capital letter - that's too much work. I'd much rather have
+`light` to be a union string type showing me all possible values. Let's rewrite it, shall we:
+
+```ts
+type TrafficLight = "Red" | "Yellow" | "Green"
+function printTrafficLight(light: TrafficLight) {
+  if (light === "Red") {
+    console.log("Stop")
+  } else if (light === "Yellow") {
+    console.log("Get ready...")
+  } else if (light === "Green") {
+    console.log("Go go go")
+  }
+}
+```
+
+Much better. Now we know what type `light` is ahead of time. No need to note all values start with a capital
+letter. On top of that, Typescript will now make sure that we don't pass in a wrong string to `printTrafficLight`.
+
+```ts
+printTrafficLight("Green") // Go go go
+printTrafficLight("Orange") // compile error - this won't work
+```
+
+These are some of the advantages provided by union string types.
+It will make your functions easier to reason with and Typescript will help you avoid typos.
+So why not give them a try?

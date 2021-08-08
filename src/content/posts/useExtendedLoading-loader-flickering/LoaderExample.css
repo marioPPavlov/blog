@@ -1,0 +1,29 @@
+.loaderExample {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin: 0 10px 2rem 10px;
+  
+}
+
+.loaderExample__simple {
+  margin-top: 0;
+  margin-bottom: 2rem;
+}
+.loaderExample__simple > h5 {
+  margin-top: 0;
+  /* height: 150px; */
+}
+
+.loaderExample__img {
+  width: 175px;
+  height: 175px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.loaderExample__message {
+  text-align: center;
+  margin: 0;
+}

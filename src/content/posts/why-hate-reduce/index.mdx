@@ -1,0 +1,95 @@
+---
+title: Why people hate reduce()
+subtitle: and why you shouldn't
+date: "2021-06-03T00:00:00.000Z"
+tags: [javascript]
+---
+
+Why people hate Array.`reduce()`
+and why you shouldn't be among them
+
+The array built in method `reduce()` is one of those functions that some thoroughly avoid using, deeming it too
+difficult to understand and others praising it for its expressiveness.
+This article won't be a tutorial on `reduce()`, rather me exploring some of the arguments against
+the use of `reduce()` and sharing my opinion on the matter. If you are not familiar with using `reduce()` you
+can refer to [mdn mozila](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
+
+## Why people dislike it reduce()
+
+While doing my research, I've found that people generally don't like reduce for the following summarized reasons:
+
+- There is a built-in method `forEach()`, that can do what reduce can do
+- A combination of `filter()` and `map()` can also achieve the same goal as `reduce()`
+- Difficult to learn
+- Reduces readability (no pun intended)
+
+Actually all of the methods `filter()`, `map()`, `reduce()`, `flat()`, `forEach()` etc. can all be replaced by
+a simple for…loop. All of them iterate through an array, however a for…loop is much
+more general than all of them. When I would review code and see a for…loop I can't make any
+assumptions about what this code block is doing and I would have to carefully analyze the body of the for…loop to get sure.
+
+Even though these methods can all be replaced with a for…loop, they provide clear intent of the user i.e they are specialized
+to the a specific task. When you encounter `map()`, it should tell you that this operation is going through every element in the array
+and transforming it into a new array with modified content. `filter()` should tell you that a new array is constructed with filtered
+out elements based on a predicate. All of these functions are predictable and provide condensed information about the purpose of the code,
+since they have a specific role assigned to them.
+
+Just like them, `reduce()` has clear intent behind it and has its type of problems to solve - iterate through
+'lots of things' and reduce them down to 'fewer things' or 'one thing' in a declarative way.
+This is achieved by a callback, where the first param is an aggregate value and the second
+one is the current iterated value of the array.
+
+```ts
+//simple way to sum elements in an array
+const arr = [2, 4, 5, 6]
+const sum = arr.reduce((a, b) => a + b, 0) // 17
+
+// how to find number of occurrences for each letter
+const letters = ["A", "D", "A", "B", "B", "B", "D", "G"]
+const letterOccurrence = letters.reduce((allLetters, letter) => {
+  if (allLetters[letter]) {
+    allLetters[letter] = 0
+  }
+  allLetters[letter]++
+  return allLetters
+}, {})
+// letterOccurrence is { A: 2, D: 2, B: 3, G: 1 }
+```
+
+And here is how you can achieve the same result with `forEach()`
+
+```ts
+//simple way to sum elements in an array
+const arr = [2, 4, 5, 6]
+let sum = 0
+arr.forEach(num => (sum += num))
+// num is now 17
+
+// how to find number of occurrences for each letter
+const letters = ["A", "D", "A", "B", "B", "B", "D", "G"]
+const letterOccurrence = {}
+letters.forEach(letter => {
+  if (letterOccurence[letter]) {
+    letterOccurrence[letter] = 0
+  }
+  letterOccurrence[letter]++
+})
+// letterOccurrence is { A: 2, D: 2, B: 3, G: 1 }
+```
+
+As you can see `forEach()` can get the job done as well and some may claim that this even more readable than `reduce()`.
+But notice how in all of these examples you have to declare a variable outside of to achieve the same result, in essence, we are
+polluting the outside scope with placeholder variables, so that we can bend `forEach()` to do, what `reduce()` was designed to do.
+By using `reduce()` we can solve the problem in one place, no need for our eyes to shift outside of the body of reduce.
+
+Since `reduce()` encourages us to keep all the action within the callback, it comes with the added benefit of easier testing.
+We can simply test the callback function, since `reduce()` always does the same thing, we just need to make sure our callback is working properly.
+
+## Conclusion
+
+When doing code reviews I prefer code that states exactly what it does and if possible,
+do so in a compact, expressive and declarative manner. When we know beforehand how built-in methods
+like `filter()`, `map()` and `reduce()` they can greatly increase the readability of our code.
+
+And since `reduce()` provides numerous benefits and is part of javascript I would advise all who shy away from it,
+to learn how to use it, since you are bound to encounter it in the wild sooner or later.

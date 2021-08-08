@@ -1,0 +1,151 @@
+---
+title: useExtendedLoading
+subtitle: to remove loader flickering
+date: "2021-06-28T00:00:00Z"
+tags: [react]
+---
+
+import LoaderExample, {
+  SimpleLoaderExample,
+  SimpleLoaderExampleWithExtendedLoader,
+} from "./LoaderExample"
+
+It's always a good idea to show a loader or indication when calling external APIs over HTTP, since we can't know how long it will take
+to complete. Getting this right, may not always be so trivial - I had a case, where fetching data from one particular backend api would sometimes take around a second
+or two - slow, right? Other times it would execute within 20ms and that's quite fast, so fast that it would result into loader
+flickering for a split second.
+
+To get a better idea of what I'm talking about, I've prepared two mocked samples, which both 'fetch' cat
+images for the same time. However the good one uses the `useExtendedLoading` and the
+bad one doesn't. Go ahead, click the buttons of the examples and notice the difference.
+
+<div className="d-flex space-evenly">
+  <div>
+    <h5 className="loaderExample__message">bad</h5>
+    <LoaderExample />
+  </div>
+  <div>
+    <h5 className="loaderExample__message">good</h5>
+    <LoaderExample shouldExtendloading />
+  </div>
+</div>
+
+Good, bad? Of course this is subjective. Some may say that it is better to show the result of an api as fast as possible. I don't know about you,
+but the 'bad' example really bugs me... So I thought, it would be great if I could make the loader appear for a minimum fixed amount of time.
+So that even if the request completes in 20ms, the loader wouldn't just flash, but hang there - in other words I want to 'artificially' extend
+the time the loader stays on the screen.
+
+So I came up with a hook, that I solves this issue in a simple way - `useExtendedLoading` that I want to share with you.
+
+## Setup
+
+To show `useExtendedLoading` in action we need to have a component to use it. Let's build a simple functional component and use the
+`useState` hook too control, whether we should display a loading indicator or not. Additionally, it should have a button,
+so that we can easily repeat the process. The delay here will be hardcoded to just 100ms to guarantee that the loader
+would flicker in an obtrusive fashion. 
+
+```tsx
+const SimpleLoaderExample = () => {
+  const [isLoading, setIsLoading] = useState(false)
+
+  const startLoading = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 100)
+  }
+
+  return (
+    <div>
+      {isLoading ? (
+        <h3>Loading...</h3>
+      ) : (
+        <>
+          <h3>press the button to load</h3>
+          <button onClick={startLoading}>click me</button>
+        </>
+      )}
+    </div>
+  )
+}
+```
+
+And here it is in action:
+
+<SimpleLoaderExample />
+
+So we can avoid this effect by using the following hook:
+
+```tsx
+const useExtendedLoading = (isLoading, minTime) => {
+  const [isExtendedLoading, setIsExtendedLoading] = useState(false)
+
+  useEffect(() => {
+    if (isLoading) {
+      setIsExtendedLoading(true)
+
+      setTimeout(() => {
+        setIsExtendedLoading(false)
+      }, minTime)
+    }
+  }, [isLoading])
+
+  return isLoading || isExtendedLoading
+}
+```
+
+and we use it like this:
+
+```tsx
+const [isLoading, setIsLoading] = useState(false)
+const showLoading = useExtendedLoading(isLoading, 400)
+```
+
+We will let `showLoading` control whether we should show the loader or not. Most of the time `isExtendedLoading` and `isLoading` will
+have the same value, except when it really matters. Everytime `isLoading` becomes `true`, our effect will react and set `isExtendedLoading`
+to `true` as well. However, when `isLoading` becomes `false`, `isExtendedLoading` will not react and not become `false`.
+
+As long as either `isExtendedLoading` or `isLoading` is `true` the loader will be shown. If `isLoading` went back to `false`,
+the hook will still return `true` until the callback in `setTimeout` triggers. Let's integrate the hook in our our
+previous `SimpleLoaderExample` component:
+
+```tsx
+const SimpleLoaderExample = () => {
+  const [isLoading, setIsLoading] = useState(false)
+  const showLoading = useExtendedLoading(isLoading, 400)
+
+  const startLoading = () => {
+    setIsLoading(true)
+    setTimeout(() => {
+      setIsLoading(false)
+    }, 100)
+  }
+
+  return (
+    <div>
+      {showLoading ? (
+        <h3>Loading...</h3>
+      ) : (
+        <>
+          <h3>press the button to load</h3>
+          <button onClick={startLoading}>click me</button>
+        </>
+      )}
+    </div>
+  )
+}
+```
+
+## And here it is in action:
+
+<SimpleLoaderExampleWithExtendedLoader />
+
+So now even though `startLoading` 'loads' in 100ms. `showLoading` will still be `true` for 400ms, which will in turn
+removes the flickering effect of the loader.
+
+## Conclusion
+
+Prolonging the time that the loader stays on the screen is just one of the ways you can handle the
+issue of an api loading 'too fast'. There are other approaches like showing a loader, only if the api
+request takes too long. Using custom hooks can definitely help with solving similar issues in an
+elegant and reusable way.
